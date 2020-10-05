@@ -1,0 +1,4 @@
+node_modules
+dist
+src/audio
+*.sqlite3

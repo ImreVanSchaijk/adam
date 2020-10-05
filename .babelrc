@@ -1,0 +1,18 @@
+{
+  "plugins": [
+    "syntax-dynamic-import",
+    [
+      "module-resolver",
+      {
+        "root": ["./src/"],
+        "alias": {
+          "settings": "./src/config/settings.json",
+          "commands": "./src/commands/",
+          "modules": "./src/modules/",
+          "meta": "./src/config/meta/"
+        }
+      }
+    ]
+  ],
+  "presets": ["@babel/preset-env"]
+}
