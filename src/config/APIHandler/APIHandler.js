@@ -3,7 +3,7 @@ import fetch from 'node-fetch';
 
 import { defaultVoice, api } from 'settings';
 
-const request = (action, parameters = '') => `${api.quotes}${action}?${parameters}`;
+const request = (action, parameters = '') => `${api.quotes}/${action}?${parameters}`;
 
 const APIHandler = {
   makeRequest: (url, options = { method: 'GET' }) => fetch(url, options).catch(console.error),
