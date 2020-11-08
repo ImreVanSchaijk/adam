@@ -2,3 +2,6 @@ node_modules
 dist
 src/audio
 *.sqlite3
+
+*/config/settings.json
+*/config/voices.json

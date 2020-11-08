@@ -1,0 +1,21 @@
+{
+	"Your quote is too short.": "Your quote is too short.",
+	"{{name}} is not a valid name. You can use the voices command to find all usable voices.": "{{name}} is not a valid name. You can use the voices command to find all usable voices.",
+	"The language {{language}} is not available.": "The language {{language}} is not available.",
+	"Please select one of the following languages:\n\n{{languageList}}": "Please select one of the following languages:\n\n{{languageList}}",
+	"Please select one of the following voices:\n\n{{voiceList}}": "Please select one of the following voices:\n\n{{voiceList}}",
+	"The following voices are available in {{language}}:\n\n>>> {{voiceList}}": "The following voices are available in {{language}}:\n\n>>> {{voiceList}}",
+	"{{name}} is not a valid name. You can use the !voices command to find all usable voices.": "{{name}} is not a valid name. You can use the !voices command to find all usable voices.",
+	"Your quote will be added.": "Your quote will be added.",
+	"Your quote has been added.": "Your quote has been added.",
+	"Auto-removed command message": "Auto-removed command message",
+	"Sucesfully updated {{field}} #{{index}}": "Sucesfully updated {{field}} #{{index}}",
+	"Looking for soundbyte updates": "Looking for soundbyte updates",
+	"Soundbyte lookup complete. Added {{addedPatterns}}": "Soundbyte lookup complete. Added {{addedPatterns}}",
+	"Soundbyte lookup complete. Added {{addedPatterns}}.": "Soundbyte lookup complete. Added {{addedPatterns}}.",
+	"Quote #{{index}} was purged.": "Quote #{{index}} was purged.",
+	"Please provide the field you wish to edit.": "Please provide the field you wish to edit.",
+	"Please provide an index for the quote you wish to edit.": "Please provide an index for the quote you wish to edit.",
+	"No new content": "No new content",
+	"No results found.": "No results found."
+}
