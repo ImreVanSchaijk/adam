@@ -4,7 +4,7 @@ import allVoices from 'config/voices.json';
 
 import { defaultVoice } from 'settings';
 
-const validateLength = ({ length }) => length > 0 || i18n.translate('Your quote is too short.');
+const validateLength = ({ length }) => length > 0 || i18n.translate('The entered value is too short.');
 
 const validateVoiceId = (usedVoice) =>
   Object.values(allVoices)
@@ -20,21 +20,27 @@ const aliases = ['addquote', 'add', 'append'];
 
 const args = [
   {
-    key: 'quote',
-    prompt: 'No quote',
+    key: 'type',
+    prompt: i18n.translate('No type provided, please select either voice or text.'),
     type: 'string',
-    default: '',
-    validate: validateLength,
+    oneOf: ['voice', 'text', 'clear', 'list'],
   },
   {
-    key: 'author',
-    prompt: 'No author',
+    key: 'pattern',
+    prompt: i18n.translate('No search pattern provided, please enter the value you wish to override.'),
     type: 'string',
-    default: '',
     validate: validateLength,
+    default: '',
   },
   {
-    key: 'voiceId',
+    key: 'output',
+    prompt: i18n.translate('No output provided, please enter the output value of the override.'),
+    type: 'string',
+    validate: validateLength,
+    default: '',
+  },
+  {
+    key: 'voice',
     prompt: 'No voice',
     type: 'string',
     default: defaultVoice,

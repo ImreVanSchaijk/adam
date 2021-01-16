@@ -6,9 +6,7 @@ import path from 'path';
 import { fileURL } from 'settings';
 
 const getFileName = (audio, encode) => {
-  const [name] = [
-    audio.startsWith('http') ? /^https?.*\/(?<name>.*?)\.mp3$/.exec(audio).groups.name : [audio],
-  ].flat();
+  const [name] = [audio.startsWith('http') ? /^https?.*\/(?<name>.*?)\.mp3$/.exec(audio).groups.name : [audio]].flat();
   return encode ? btoa(name) : name;
 };
 
@@ -21,10 +19,9 @@ const Voice = {
     const response = await fetch(audioToPlay);
     const file = await response.arrayBuffer();
 
-    const fileName = path.resolve(
-      __dirname,
-      `../audio/${folderType}/${getFileName(audio, encode)}.${ext}`,
-    );
+    const fileName = path.resolve(__dirname, `../audio/${folderType}/${getFileName(audio, encode)}.${ext}`);
+
+    console.log({ audio });
 
     if (!fs.existsSync(fileName)) {
       await fs.writeFile(fileName, Buffer.from(file), 'binary');
@@ -36,7 +33,7 @@ const Voice = {
   say: async (
     { guild, member, audio, folderType },
     preload = false,
-    preloadData = { type: 'remove', encode: true },
+    preloadData = { type: 'remove', encode: true }
   ) => {
     const { id } = member;
     const { encode } = preloadData;
@@ -46,10 +43,7 @@ const Voice = {
       const userIsInChannel = channel.members.get(id);
 
       if (userIsInChannel) {
-        let filePath = path.resolve(
-          __dirname,
-          `../audio/${folderType}/${getFileName(audio, encode)}.mp3`,
-        );
+        let filePath = path.resolve(__dirname, `../audio/${folderType}/${getFileName(audio, encode)}.mp3`);
 
         if (!preload) {
           const loadedFile = await Voice.preloadFile({ audio, ext: 'mp3', folderType, encode });
@@ -81,7 +75,7 @@ const Voice = {
           }
         });
         dispatcher.on('error', (e) => {
-          console.error(e);
+          console.error(new Error(e));
 
           const { type } = preloadData;
           if (type === 'remove') fs.unlink(filePath);

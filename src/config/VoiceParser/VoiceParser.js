@@ -1,9 +1,4 @@
-import sortObject from 'sort-object-keys';
-
 import APIHandler from 'config/APIHandler';
-
-import textOverrides from './_text.json';
-import voiceOverrides from './_voice.json';
 
 const sort = ({ quote, author, contributor, timestamp, audio, voiceId, embed }) => ({
   quote,
@@ -15,27 +10,37 @@ const sort = ({ quote, author, contributor, timestamp, audio, voiceId, embed }) 
   embed,
 });
 
-const VoiceParser = {
-  parse: async ({ quote, author, voiceId, ...rest }) => {
-    const voice = voiceId.replace('22k', '');
+export default class VoiceParser {
+  constructor({ overrides }) {
+    this.voiceOverrides = overrides.voice;
+    this.textOverrides = overrides.text;
+
+    console.log({ overrides });
+  }
+
+  async run({ quote, author, voiceId, ...rest }) {
     const voiceNeedles = [];
     const voiceTargets = [];
 
-    Object.values(voiceOverrides[voice]).forEach(([needle, target]) => {
+    if (!this.voiceOverrides[voiceId]) {
+      this.voiceOverrides[voiceId] = [];
+    }
+
+    Object.values(this.voiceOverrides[voiceId]).forEach(([needle, target]) => {
       voiceNeedles.push(needle);
       voiceTargets.push(target);
     });
 
     const keys = {
-      text: Object.keys(textOverrides).join('|'),
+      text: Object.keys(this.textOverrides).join('|'),
       voice: voiceNeedles.join('|'),
     };
 
     const patterns = { text: new RegExp(`-(${keys.text})-`, 'g'), voice: new RegExp(`(${keys.voice})`, 'g') };
 
     const textObject = {
-      quote: quote.replace(patterns.text, (_, match) => textOverrides[match]),
-      author: author.replace(patterns.text, (_, match) => textOverrides[match]),
+      quote: quote.replace(patterns.text, (_, match) => this.textOverrides[match]),
+      author: author.replace(patterns.text, (_, match) => this.textOverrides[match]),
     };
 
     const audioReplace = (_, match) => {
@@ -48,6 +53,8 @@ const VoiceParser = {
       author: textObject.author.replace(patterns.voice, audioReplace),
     };
 
+    console.log({ audioObject });
+
     const audio = await APIHandler.getAudio({ quote: audioObject.quote, author: audioObject.author, voiceId });
 
     return sort({
@@ -57,13 +64,5 @@ const VoiceParser = {
       voiceId,
       audio,
     });
-  },
-};
-
-export default VoiceParser;
-
-VoiceParser.parse({
-  quote: 'This quote contains -FAKE- as well as a -LENNY- face, it also mentions Opa Harry',
-  author: 'joch with -LENNY-',
-  voiceId: 'willoldman22k',
-});
+  }
+}

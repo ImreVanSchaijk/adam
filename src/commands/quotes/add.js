@@ -27,9 +27,12 @@ export default class Quote extends Command {
     } = message;
 
     const reply = await message.reply(i18n.translate('Your quote will be added.'));
+    const parser = new VoiceParser({
+      overrides: await this.client.provider.get(id, 'overrides', { voice: {}, text: [] }),
+    });
 
     const newQuote = {
-      ...(await VoiceParser.parse({ quote, author, voiceId })),
+      ...(await parser.run({ quote, author, voiceId })),
       contributor,
       timestamp: new Date().getTime(),
       embed: null,

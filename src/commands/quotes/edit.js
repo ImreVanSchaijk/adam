@@ -28,14 +28,17 @@ export default class Edit extends Command {
     const quoteToUpdate = quotes[index];
 
     const reply = await message.say(
-      `Updating ${field} #${index}: (${JSON.stringify({ field, index, newContent, voiceId })})`,
+      `Updating ${field} #${index}: (${JSON.stringify({ field, index, newContent, voiceId })})`
     );
 
     if (quoteToUpdate) {
       let newQuote = { ...quoteToUpdate, [field]: newContent };
 
       if (audioUpdateRequired(field)) {
-        newQuote = await VoiceParser.parse(newQuote);
+        const parser = new VoiceParser({
+          overrides: await this.client.provider.get(id, 'overrides', { voice: {}, text: [] }),
+        });
+        newQuote = await parser.run(newQuote);
       }
 
       const { errors } = await APIHandler.setQuotes({
