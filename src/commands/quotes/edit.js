@@ -6,7 +6,7 @@ import APIHandler from 'config/APIHandler';
 import VoiceParser from 'config/VoiceParser';
 import { args } from 'meta/quotes/edit';
 
-const audioUpdateRequired = (field) => ['quote', 'author', 'voice'].includes(field);
+const audioUpdateRequired = (field) => ['quote', 'author', 'voiceId'].includes(field);
 
 export default class Edit extends Command {
   constructor(client) {
