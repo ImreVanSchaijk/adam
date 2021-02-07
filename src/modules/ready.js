@@ -10,7 +10,7 @@ const getFolders = async (folders) => {
   const allFolders = {};
 
   const folderPromises = await Promise.all(
-    folders.map((folder) => fs.readdir(path.resolve(__dirname, `../audio/${folder}`))),
+    folders.map((folder) => fs.readdir(path.resolve(__dirname, `../audio/${folder}`)))
   );
 
   folders.forEach((folder, i) => {
@@ -48,7 +48,8 @@ const preloadQuotes = async ({ quotes, provider }) => {
     const blacklist = await provider.get(key, 'blacklist', ['0']);
     const validQuotes = Object.keys(quotes.get(key)).filter((value) => !blacklist.includes(value));
 
-    const nextRandom = validQuotes[Math.floor(Math.random() * validQuotes.length)];
+    const nextRandom = validQuotes.length > 0 ? validQuotes[Math.floor(Math.random() * validQuotes.length)] : 0;
+    await provider.set(key, 'blacklist', [...blacklist, `${validQuotes[nextRandom]}`]);
     await provider.set(key, 'nextRandom', nextRandom);
 
     return nextRandom;
@@ -59,13 +60,13 @@ const preloadQuotes = async ({ quotes, provider }) => {
   await Promise.all(
     Object.keys(existingFiles).map(async (key) => {
       existingFiles[key].forEach((file) => fs.unlink(path.resolve(__dirname, `../audio/${key}/${file}`)));
-    }),
+    })
   );
 
   const selectedNumbers = await Promise.all(getNumbers);
   const getFiles = selectedNumbers.map(async (number, i) => {
-    const { audio } = quotes.get(quotes.keyArray()[i])[number];
-    const { file } = await Voice.preloadFile({ audio, ext: 'mp3', folderType: 'quotes', encode: true });
+    const id = quotes.keyArray()[i];
+    const { file } = await Voice.preloadFile({ ...quotes.get(id)[number], id }, provider);
 
     return file;
   });
