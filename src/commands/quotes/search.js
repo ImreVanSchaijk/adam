@@ -20,8 +20,8 @@ const parseQuote = ({ timestamp, audio, contributor, quote, author, embed }, ind
   embed,
 });
 
-const playAudioQuote = async (audio, guild, member, preload) => {
-  Voice.say({ audio, guild, member, folderType: 'quotes' }, preload);
+const playAudioQuote = async (data, preload) => {
+  Voice.say(data, preload);
 };
 
 export default class Quote extends Command {
@@ -44,7 +44,7 @@ export default class Quote extends Command {
       const { [field]: f } = quote;
       if (field === 'all') {
         return Object.values(quote).some(
-          (value) => value !== null && value.toString().toLowerCase().includes(query.toLowerCase()),
+          (value) => value !== null && value.toString().toLowerCase().includes(query.toLowerCase())
         );
       }
       return f.toLowerCase().includes(query.toLowerCase());
@@ -56,7 +56,7 @@ export default class Quote extends Command {
     if (matches[i]) {
       const { parsedQuote, audio } = parseQuote(matches[i], originalIndex);
 
-      playAudioQuote(audio, guild, author, false);
+      playAudioQuote({ ...matches[i], guild, member: author }, false);
 
       return message.say(parsedQuote);
     }
