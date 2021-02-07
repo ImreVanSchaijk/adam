@@ -1,7 +1,9 @@
+import S3 from 'aws-sdk/clients/s3';
 import btoa from 'btoa';
 import fetch from 'node-fetch';
+import fs from 'promise-fs';
 
-import { defaultVoice, api } from 'settings';
+import { defaultVoice, api, s3 } from 'settings';
 
 const request = (action, parameters = '') => `${api.quotes}/${action}?${parameters}`;
 
@@ -38,6 +40,23 @@ const APIHandler = {
       return response.json();
     }
     return { errors: ['action parameter not set'] };
+  },
+
+  s3Upload: async ({ filePath, id, name }) => {
+    const { bucket, ...credentials } = s3;
+    const file = await fs.readFile(filePath);
+
+    const parameters = {
+      Bucket: bucket,
+      Key: [id, name].join('/'), // File name you want to save as in S3
+      Body: file,
+    };
+
+    const client = new S3(credentials);
+    client.upload(parameters, (err, data) => {
+      if (err) throw err;
+      console.info(`File uploaded successfully. ${data.Location}`);
+    });
   },
 
   getAudio: async ({ quote, author, voiceId }) => {
