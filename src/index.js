@@ -20,7 +20,9 @@ const isDebug = process.argv.includes('--debug-discord');
 const loginToken = isDebug ? debugToken : token;
 const { ready, ...events } = allEvents;
 
-if (isDebug) console.info(colors.red('Using debug token'));
+if (isDebug) {
+  console.info(colors.red('Using debug token'));
+} else process.env.NODE_ENV = 'production';
 
 (async () => {
   const client = new Client({ owner });
