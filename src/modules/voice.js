@@ -1,7 +1,7 @@
-import btoa from 'btoa';
 import fetch from 'node-fetch';
 import fs from 'promise-fs';
 import path from 'path';
+import shortHash from 'short-hash';
 
 import VoiceParser from 'config/VoiceParser';
 import APIHandler from 'config/APIHandler';
@@ -9,15 +9,16 @@ import APIHandler from 'config/APIHandler';
 import { fileURL, sourceURL } from 'settings';
 
 const Voice = {
+  getName: (audio, { quote, author, voiceId }) => {
+    if (audio.startsWith('http')) return path.basename(audio).replace(/\.mp3/g, '');
+    return shortHash(JSON.stringify({ quote, author, voiceId }));
+  },
+
   parseAudio: ({ id, audio, name }) =>
     `${audio.startsWith('http') ? audio.replace(/\.mp3$/g, '') : `${fileURL}/${id}/${name}`}.mp3`,
 
   preloadFile: async ({ audio, id, ext = 'mp3', folderType = 'quotes', ...data }, provider = null) => {
-    const { quote, author, voiceId } = data;
-
-    const name = audio.startsWith('http')
-      ? path.basename(audio).replace(/\.mp3/g, '')
-      : btoa(JSON.stringify({ quote, author, voiceId }));
+    const name = Voice.getName(audio, data);
 
     const audioToPlay = Voice.parseAudio({ id, audio, name });
 
@@ -67,7 +68,7 @@ const Voice = {
       if (userIsInChannel) {
         const fileName =
           folderType === 'quotes'
-            ? btoa(JSON.stringify({ quote: data.quote, author: data.author, voiceId: data.voiceId }))
+            ? shortHash(JSON.stringify({ quote: data.quote, author: data.author, voiceId: data.voiceId }))
             : path.basename(audio).replace(/\.mp3$/, '');
 
         let filePath = path.resolve(__dirname, `../audio/${folderType}/${fileName}.mp3`);

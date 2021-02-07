@@ -37,6 +37,7 @@
     "node-fetch": "^2.6.1",
     "promise-fs": "^2.1.1",
     "regenerator-runtime": "^0.13.7",
+    "short-hash": "^1.0.0",
     "sqlite": "^4.0.14",
     "sqlite3": "^5.0.0",
     "utf-8-validate": "^5.0.2",
