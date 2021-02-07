@@ -54,7 +54,7 @@ export default class Quote extends Command {
     const originalIndex = quotes.findIndex((obj) => JSON.stringify(obj) === JSON.stringify(matches[i]));
 
     if (matches[i]) {
-      const { parsedQuote, audio } = parseQuote(matches[i], originalIndex);
+      const { parsedQuote } = parseQuote(matches[i], originalIndex);
 
       playAudioQuote({ ...matches[i], guild, member: author }, false);
 

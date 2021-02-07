@@ -36,10 +36,11 @@ const downloadQuotes = async (guilds, provider) => {
 };
 
 const checkFolders = async () => {
-  const directory = await fs.readdir(path.resolve(__dirname, '../../', 'src'));
+  const folder = process.env.NODE_ENV === 'production' ? 'dist' : 'src';
+  const directory = await fs.readdir(path.resolve(__dirname, '../../', folder));
 
   if (!directory.includes('audio')) {
-    await fs.mkdir(path.resolve(__dirname, '../src/audio'));
+    await fs.mkdir(path.resolve(__dirname, `../${folder}/audio`));
   }
 };
 
