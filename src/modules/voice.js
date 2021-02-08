@@ -85,11 +85,14 @@ const Voice = {
         }
 
         const connection = await channel.join();
+        console.log({ now_playing: filePath });
         const dispatcher = await connection.play(fs.createReadStream(filePath));
 
         const fileRemovalFallback = setTimeout(() => {
           if (type === 'remove') fs.unlink(filePath);
         }, 120000);
+
+        dispatcher.on('debug', console.info);
 
         dispatcher.on('speaking', (isSpeaking) => {
           if (isSpeaking === 0) {
