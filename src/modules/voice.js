@@ -85,8 +85,7 @@ const Voice = {
         }
 
         const connection = await channel.join();
-        console.log({ now_playing: filePath });
-        const dispatcher = await connection.play(fs.createReadStream(filePath));
+        const dispatcher = await connection.play(filePath);
 
         const fileRemovalFallback = setTimeout(() => {
           if (type === 'remove') fs.unlink(filePath);
