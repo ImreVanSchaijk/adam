@@ -25,12 +25,13 @@ const downloadQuotes = async (guilds, provider) => {
 
   const { quotes } = await APIHandler.getQuotes(ids);
 
-  const addedQuotes = await Promise.all(Object.keys(quotes).map((id) => provider.set(id, 'quotes', quotes[id])));
-
   const quoteCollection = new Collection();
-  addedQuotes.forEach((q, i) => {
-    quoteCollection.set(ids[i], q);
-  });
+  await Promise.all(
+    Object.keys(quotes).map(async (id) => {
+      await provider.set(id, 'quotes', quotes[id]);
+      quoteCollection.set(id, quotes[id]);
+    })
+  );
 
   return quoteCollection;
 };
