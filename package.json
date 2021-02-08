@@ -6,6 +6,7 @@
   "author": "thtguytho <imre@thtguytho.nl>",
   "license": "MIT",
   "scripts": {
+    "babel": "babel",
     "build": "babel src -d dist",
     "start": "node dist/index",
     "debug": "nodemon --exec babel-node src/index.js --debug-discord"
