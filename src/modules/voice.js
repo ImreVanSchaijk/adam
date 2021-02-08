@@ -94,14 +94,17 @@ const Voice = {
 
         dispatcher.on('debug', console.info);
 
-        dispatcher.on('speaking', (isSpeaking) => {
-          if (isSpeaking === 0) {
-            clearTimeout(fileRemovalFallback);
+        dispatcher.on('start', () => {
+          console.log('setting speaking event handler');
+          dispatcher.on('speaking', (isSpeaking) => {
+            if (isSpeaking === 0) {
+              clearTimeout(fileRemovalFallback);
 
-            if (type === 'remove') fs.unlink(filePath);
+              if (type === 'remove') fs.unlink(filePath);
 
-            connection.disconnect();
-          }
+              // connection.disconnect();
+            }
+          });
         });
         dispatcher.on('error', (e) => {
           console.error(new Error(e));
