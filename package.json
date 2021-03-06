@@ -22,7 +22,7 @@
   },
   "dependencies": {
     "@discordjs/opus": "^0.3.2",
-    "aws-sdk": "^2.839.0",
+    "aws-sdk": "^2.844.0",
     "btoa": "^1.2.1",
     "bufferutil": "^4.0.1",
     "cheerio": "^1.0.0-rc.3",

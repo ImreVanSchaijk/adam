@@ -1,4 +1,5 @@
 node_modules
+*error.log
 dist
 src/audio
 *.sqlite3
