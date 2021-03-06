@@ -6,15 +6,19 @@ import { defaultVoice } from 'settings';
 
 const validateLength = ({ length }) => length > 0 || i18n.translate('The entered value is too short.');
 
-const validateVoiceId = (usedVoice) =>
-  Object.values(allVoices)
+const validateVoiceId = (usedVoice) => {
+  const matchesVoice = Object.values(allVoices)
     .flat()
-    .some((voice) => voice.toLowerCase().startsWith(usedVoice.toLowerCase())) ||
-  i18n.translate(`{{name}} is not a valid name. You can use the !voices command to find all usable voices.`, {
+    .some((voice) => voice.toLowerCase().startsWith(usedVoice.toLowerCase()));
+
+  if (matchesVoice || usedVoice === 'all') return true;
+
+  return i18n.translate(`{{name}} is not a valid name. You can use the !voices command to find all usable voices.`, {
     name: usedVoice,
   });
+};
 
-const parseVoiceId = (voice) => `${voice.toLowerCase().replace(/(22k)/, '')}22k`;
+const parseVoiceId = (voice) => (voice === 'all' ? voice : `${voice.toLowerCase().replace(/(22k)/, '')}22k`);
 
 const aliases = ['addquote', 'add', 'append'];
 
@@ -46,6 +50,12 @@ const args = [
     default: defaultVoice,
     validate: validateVoiceId,
     parse: parseVoiceId,
+  },
+  {
+    key: 'clear',
+    type: 'string',
+    prompt: 'test',
+    default: '',
   },
 ];
 

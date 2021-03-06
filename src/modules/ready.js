@@ -68,7 +68,7 @@ const preloadQuotes = async ({ quotes, provider }) => {
   const selectedNumbers = await Promise.all(getNumbers);
   const getFiles = selectedNumbers.map(async (number, i) => {
     const id = quotes.keyArray()[i];
-    const { file } = await Voice.preloadFile({ ...quotes.get(id)[number], id }, provider);
+    const { file } = await new Voice({ id, provider, quote: quotes.get(id)[number] }).preloadFile();
 
     return file;
   });
@@ -77,10 +77,17 @@ const preloadQuotes = async ({ quotes, provider }) => {
   console.info('Finished preloading audio');
 };
 
+const purgeUnusedHashes = async ({ guilds, provider }) => {
+  const ids = [...guilds.cache.array().map(({ id }) => id)];
+
+  await Promise.all(ids.map(async (id) => APIHandler.purgeS3Bucket({ provider, id })));
+};
+
 const ready = async ({ guilds, provider }) => {
   const quotes = await downloadQuotes(guilds, provider);
   await checkFolders();
   await preloadQuotes({ quotes, provider });
+  await purgeUnusedHashes({ guilds, provider });
 };
 
 export default ready;

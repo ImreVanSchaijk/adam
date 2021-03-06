@@ -8,108 +8,137 @@ import APIHandler from 'config/APIHandler';
 
 import { fileURL, sourceURL } from 'settings';
 
-const Voice = {
-  getName: (audio, { quote, author, voiceId }) => {
-    if (audio.startsWith('http')) return path.basename(audio).replace(/\.mp3/g, '');
-    return shortHash(JSON.stringify({ quote, author, voiceId }));
-  },
+const removeTypes = ['quotes'];
+const audioIdentifiers = ['quote', 'author', 'voiceId'];
 
-  parseAudio: ({ id, audio, name }) =>
-    `${audio.startsWith('http') ? audio.replace(/\.mp3$/g, '') : `${fileURL}/${id}/${name}`}.mp3`,
+export default class Voice {
+  constructor({ ext = 'mp3', folderType = 'quotes', id = null, message, provider, quote }) {
+    this.ext = ext;
+    this.folderType = folderType;
+    this.id = id || message.guild.id;
+    this.message = message;
+    this.provider = provider;
 
-  preloadFile: async ({ audio, id, ext = 'mp3', folderType = 'quotes', ...data }, provider = null) => {
-    const name = Voice.getName(audio, data);
+    this.quote = {};
+    this.audio = quote.audio;
+    Object.keys(quote)
+      .filter((key) => audioIdentifiers.includes(key))
+      .forEach((key) => {
+        this.quote[key] = quote[key];
+      });
 
-    const audioToPlay = Voice.parseAudio({ id, audio, name });
+    this.hash = shortHash(JSON.stringify(this.quote));
+  }
 
-    const fileName = path.resolve(__dirname, `../audio/${folderType}/${name}.${ext}`);
+  async getName() {
+    if (this.audio.startsWith('http')) return path.basename(this.audio).replace(/\.mp3/g, '');
+
+    const { hash } = await new VoiceParser({ overrides: await this.getOverrides() }).getAudioHash(this.quote);
+    return hash;
+  }
+
+  parseAudio({ name }) {
+    if (this.audio.startsWith('http')) {
+      return this.audio.replace(/\.mp3$/g, '');
+    }
+    return `${fileURL}/${this.id}/${name}.mp3`;
+  }
+
+  async getOverrides() {
+    return this.provider.get(this.id, 'overrides', { voice: {}, text: [] });
+  }
+
+  async getNewFile(fileName) {
+    if (!this.provider) {
+      return { file: null, error: new Error('Request failed - unable to reacquire file from source') };
+    }
+
+    const parser = new VoiceParser({
+      overrides: await this.getOverrides(),
+    });
+
+    const { audio: newHash } = await parser.run(this.quote);
+    const newFile = await fetch(`${sourceURL}${newHash}.${this.ext}`);
+
+    if (newFile.status === 200 && !fs.existsSync(fileName)) {
+      const file = await newFile.arrayBuffer();
+
+      await fs.writeFile(fileName, Buffer.from(file), 'binary');
+      await APIHandler.s3Upload({ filePath: fileName, id: this.id, name: `${this.hash}.${this.ext}` });
+
+      return { file: fileName, error: null };
+    }
+    return { file: null, error: new Error(newFile.statusText) };
+  }
+
+  async preloadFile() {
+    const name = await this.getName(this.audio);
+    const audioToPlay = this.parseAudio({ name });
+
+    const fileName = path.resolve(__dirname, `../audio/${this.folderType}/${name}.${this.ext}`);
     const response = await fetch(audioToPlay);
 
     if (response.status === 200) {
-      const file = await response.arrayBuffer();
-
       if (!fs.existsSync(fileName)) {
-        await fs.writeFile(fileName, Buffer.from(file), 'binary');
+        const buffer = Buffer.from(await response.arrayBuffer());
+        await fs.writeFile(fileName, buffer, 'binary');
       }
 
       return { file: fileName, error: null };
     }
 
     // Attempt to reacquire file from source
-    if (response.status === 403 && folderType === 'quotes') {
-      if (!provider) return { file: null, error: new Error('Request failed - unable to reacquire file from source') };
-
-      const parser = new VoiceParser({
-        overrides: await provider.get(id, 'overrides', { voice: {}, text: [] }),
-      });
-
-      const { audio: newHash } = await parser.run(data);
-      const newFile = await fetch(`${sourceURL}${newHash}.${ext}`);
-
-      if (newFile.status === 200 && !fs.existsSync(fileName)) {
-        const file = await newFile.arrayBuffer();
-
-        await fs.writeFile(fileName, Buffer.from(file), 'binary');
-        await APIHandler.s3Upload({ filePath: fileName, id, name: `${name}.${ext}` });
-
-        return { file: fileName, error: null };
-      }
+    if (response.status === 403 && this.folderType === 'quotes') {
+      return this.getNewFile(fileName);
     }
     return { file: null, error: new Error(response.statusText) };
-  },
+  }
 
-  say: async ({ guild, member, audio, folderType = 'quotes', ...data }, preload = false, { type = 'remove' } = {}) => {
-    const { id } = member;
-    const voiceChannels = guild.channels.cache.filter(({ type: t }) => t === 'voice');
+  async say() {
+    console.log({ message: this.message });
+    const {
+      guild,
+      member: { id },
+    } = this.message;
+
+    const voiceChannels = guild.channels.cache.filter(({ type }) => type === 'voice');
 
     const playing = voiceChannels.map(async (channel) => {
       const userIsInChannel = channel.members.get(id);
 
       if (userIsInChannel) {
-        const fileName =
-          folderType === 'quotes'
-            ? shortHash(JSON.stringify({ quote: data.quote, author: data.author, voiceId: data.voiceId }))
-            : path.basename(audio).replace(/\.mp3$/, '');
+        const fileName = await this.getName(this.audio);
 
-        let filePath = path.resolve(__dirname, `../audio/${folderType}/${fileName}.mp3`);
-
-        if (!preload || !fs.existsSync(filePath)) {
-          const loadedFile = await Voice.preloadFile({ audio, id: guild.id, ext: 'mp3', folderType });
+        let filePath = path.resolve(__dirname, `../audio/${this.folderType}/${fileName}.mp3`);
+        if (!fs.existsSync(filePath)) {
+          const loadedFile = await this.preloadFile(this.audio);
 
           if (!loadedFile) return;
-
-          const { file, error } = loadedFile;
-          if (error === null) {
-            filePath = file;
-          }
+          if (loadedFile.error === null) filePath = loadedFile.file;
         }
 
         const connection = await channel.join();
-        console.log({ now_playing: filePath });
-        const dispatcher = await connection.play(filePath);
+        const dispatcher = await connection.play(fs.createReadStream(filePath));
 
         const fileRemovalFallback = setTimeout(() => {
-          if (type === 'remove') fs.unlink(filePath);
+          if (removeTypes.includes(this.folderType)) fs.unlink(filePath);
         }, 120000);
 
         dispatcher.on('debug', console.info);
 
-        dispatcher.on('start', () => {
-          console.log('setting speaking event handler');
-          dispatcher.on('speaking', (isSpeaking) => {
-            if (isSpeaking === 0) {
-              clearTimeout(fileRemovalFallback);
+        dispatcher.on('speaking', (isSpeaking) => {
+          if (isSpeaking === 0) {
+            clearTimeout(fileRemovalFallback);
 
-              if (type === 'remove') fs.unlink(filePath);
+            if (removeTypes.includes(this.folderType)) fs.unlink(filePath);
 
-              // connection.disconnect();
-            }
-          });
+            connection.disconnect();
+          }
         });
         dispatcher.on('error', (e) => {
           console.error(new Error(e));
 
-          if (type === 'remove') fs.unlink(filePath);
+          if (removeTypes.includes(this.folderType)) fs.unlink(filePath);
 
           connection.disconnect();
         });
@@ -117,7 +146,5 @@ const Voice = {
     });
 
     await Promise.all(playing);
-  },
-};
-
-export default Voice;
+  }
+}
