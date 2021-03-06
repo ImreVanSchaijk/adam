@@ -45,22 +45,15 @@ export default class SoundByte extends Command {
   }
 
   async run(message) {
-    const { guild, member, content } = message;
+    const { content } = message;
 
     const file = content.replace('!', '');
     if (file !== 'soundbyte') {
-      const soundbytes = await fs.readdir(path.resolve(__dirname, '../../audio/soundbytes/'));
-
-      const response = Voice.say(
-        {
-          audio: `${api.audio}/bytes/${file}.mp3`,
-          guild,
-          member,
-          folderType: 'soundbytes',
-        },
-        soundbytes.some((byte) => byte.startsWith(file)), // Should file be preloaded?
-        { type: 'keep', encode: false }
-      );
+      const response = new Voice({
+        folderType: 'soundbytes',
+        message,
+        quote: { audio: `${api.audio}/bytes/${file}.mp3` },
+      }).say();
 
       if (typeof response === 'string') {
         return message.say(response);
