@@ -18,10 +18,6 @@ const parseQuote = ({ timestamp, audio, contributor, quote, author, embed }, ind
   embed,
 });
 
-const playAudioQuote = async (data, preload) => {
-  Voice.say(data, preload);
-};
-
 export default class Quote extends Command {
   constructor(client) {
     super(client, {
@@ -51,19 +47,20 @@ export default class Quote extends Command {
     // Set index of next quote and preload its audio
     const nextRandom = validIndices[Math.floor(Math.random() * (validIndices.length || Object.keys(quotes).length))];
     provider.set(guild, 'nextRandom', nextRandom);
-    Voice.preloadFile({ ...quotes[nextRandom], id: guild.id }, provider);
+    new Voice({ id: guild.id, provider, quote: quotes[nextRandom] }).preloadFile();
 
     return randomIndex;
   }
 
   async run(message, { index }) {
-    const { guild, author } = message;
-    const quotes = await this.client.provider.get(guild, 'quotes', []);
+    const { provider } = this.client;
+    const { guild } = message;
+    const quotes = await provider.get(guild, 'quotes', []);
 
     const quoteIndex = index.length > 0 ? index : await this.getRandomNumber(guild, quotes);
     const { parsedQuote } = parseQuote(quotes[quoteIndex], quoteIndex);
 
-    playAudioQuote({ ...quotes[quoteIndex], guild, member: author }, index.length === 0);
+    new Voice({ message, provider, quote: quotes[quoteIndex] }).say();
 
     return message.say(parsedQuote);
   }

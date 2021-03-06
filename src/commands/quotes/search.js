@@ -20,10 +20,6 @@ const parseQuote = ({ timestamp, audio, contributor, quote, author, embed }, ind
   embed,
 });
 
-const playAudioQuote = async (data, preload) => {
-  Voice.say(data, preload);
-};
-
 export default class Quote extends Command {
   constructor(client) {
     super(client, {
@@ -38,8 +34,9 @@ export default class Quote extends Command {
   }
 
   async run(message, { field, query }) {
-    const { guild, author } = message;
-    const quotes = await this.client.provider.get(guild, 'quotes', []);
+    const { provider } = this.client;
+    const { guild } = message;
+    const quotes = await provider.get(guild, 'quotes', []);
     const matches = quotes.filter((quote) => {
       const { [field]: f } = quote;
       if (field === 'all') {
@@ -56,7 +53,7 @@ export default class Quote extends Command {
     if (matches[i]) {
       const { parsedQuote } = parseQuote(matches[i], originalIndex);
 
-      playAudioQuote({ ...matches[i], guild, member: author }, false);
+      new Voice({ message, provider, quote: matches[i] }).say();
 
       return message.say(parsedQuote);
     }

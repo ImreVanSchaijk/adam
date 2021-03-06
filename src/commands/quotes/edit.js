@@ -27,8 +27,9 @@ export default class Edit extends Command {
     const quotes = await this.client.provider.get(id, 'quotes', []);
     const quoteToUpdate = quotes[index];
 
-    const reply = await message.say(
-      `Updating ${field} #${index}: (${JSON.stringify({ field, index, newContent, voiceId })})`
+    const reply = await message.code(
+      'json',
+      JSON.stringify({ [`updating_${field}_${index}`]: { field, index, newContent, voiceId } }, null, 2)
     );
 
     if (quoteToUpdate) {
@@ -41,19 +42,21 @@ export default class Edit extends Command {
         newQuote = await parser.run(newQuote);
       }
 
-      const { errors } = await APIHandler.setQuotes({
-        newQuote,
-        id,
-        name: name.toLowerCase().replace(/[ ]/g, '_'),
-        action: 'edit',
-        index,
-      });
+      if (newQuote.audio) {
+        const { errors } = await APIHandler.setQuotes({
+          newQuote,
+          id,
+          name: name.toLowerCase().replace(/[ ]/g, '_'),
+          action: 'edit',
+          index,
+        });
 
-      if (errors === null) {
-        const newQuotes = [...quotes];
-        newQuotes[index] = newQuote;
-        await this.client.provider.set(id, 'quotes', newQuotes);
-      }
+        if (errors === null) {
+          const newQuotes = [...quotes];
+          newQuotes[index] = newQuote;
+          await this.client.provider.set(id, 'quotes', newQuotes);
+        }
+      } else return reply.edit(i18n.translate('Error updating {{field}} #{{index}}', { field, index }));
     }
 
     return reply.edit(i18n.translate('Sucesfully updated {{field}} #{{index}}', { field, index }));
