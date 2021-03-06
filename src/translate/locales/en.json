@@ -22,5 +22,12 @@
 	"No search pattern provided, please enter the value you wish to override.": "No search pattern provided, please enter the value you wish to override.",
 	"No output provided, please enter the output value of the override.": "No output provided, please enter the output value of the override.",
 	"The pattern {{pattern}} already exists for voice {{voice}}": "The pattern {{pattern}} already exists for voice {{voice}}",
-	"The pattern `{{pattern}}` already exists for voice `{{voice}}`": "The pattern `{{pattern}}` already exists for voice `{{voice}}`"
+	"The pattern `{{pattern}}` already exists for voice `{{voice}}`": "The pattern `{{pattern}}` already exists for voice `{{voice}}`",
+	"No action provided, please enter either `get` or `set`.": "No action provided, please enter either `get` or `set`.",
+	"Invalid query, please enter a valid query to run against the database.": "Invalid query, please enter a valid query to run against the database.",
+	"The pattern `{{pattern}}` already exists for voice `{{voice}}`, do you wish to update this pattern?": "The pattern `{{pattern}}` already exists for voice `{{voice}}`, do you wish to update this pattern?",
+	"Command cancelled": "Command cancelled",
+	"Error updating {{field}} #{{index}}": "Error updating {{field}} #{{index}}",
+	"Fetching audio hashes": "Fetching audio hashes",
+	"Fetching hashes": "Fetching hashes"
 }
