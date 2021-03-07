@@ -38,7 +38,8 @@ if (isDebug) {
   client.login(loginToken);
 
   client.on('ready', async () => {
-    await client.setProvider(new SQLiteProvider(database));
+    const provider = new SQLiteProvider(database);
+    await client.setProvider(provider);
 
     await ready({ guilds: client.guilds, provider: client.provider });
 
@@ -46,5 +47,8 @@ if (isDebug) {
       .registerGroups(commandGroups)
       .registerDefaults()
       .registerCommandsIn(path.resolve(__dirname, 'commands'));
+
+    // Just in case
+    await provider.init(client);
   });
 })();
