@@ -41,7 +41,11 @@ const checkFolders = async () => {
   const directory = await fs.readdir(path.resolve(__dirname, '../../', folder));
 
   if (!directory.includes('audio')) {
-    await fs.mkdir(path.resolve(__dirname, `../${folder}/audio`));
+    await Promise.all(
+      ['quotes', 'soundbytes'].map(async (folderName) =>
+        fs.mkdir(path.resolve(__dirname, `../audio/${folderName}`), { recursive: true })
+      )
+    );
   }
 };
 
