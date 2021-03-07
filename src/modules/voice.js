@@ -39,7 +39,7 @@ export default class Voice {
 
   parseAudio({ name }) {
     if (this.audio.startsWith('http')) {
-      return this.audio.replace(/\.mp3$/g, '');
+      return this.audio;
     }
     return `${fileURL}/${this.id}/${name}.mp3`;
   }
@@ -76,6 +76,7 @@ export default class Voice {
     const audioToPlay = this.parseAudio({ name });
 
     const fileName = path.resolve(__dirname, `../audio/${this.folderType}/${name}.${this.ext}`);
+    console.log({ fileName, audioToPlay, name });
     const response = await fetch(audioToPlay);
 
     if (response.status === 200) {
