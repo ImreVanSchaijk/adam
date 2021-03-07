@@ -39,6 +39,7 @@
     "promise-fs": "^2.1.1",
     "regenerator-runtime": "^0.13.7",
     "short-hash": "^1.0.0",
+    "sqlite": "^4.0.19",
     "sqlite3": "^5.0.0",
     "utf-8-validate": "^5.0.2",
     "zlib-sync": "^0.1.7"
