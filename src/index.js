@@ -36,14 +36,15 @@ if (isDebug) {
   });
 
   client.login(loginToken);
-  client.registry
-    .registerGroups(commandGroups)
-    .registerDefaults()
-    .registerCommandsIn(path.resolve(__dirname, 'commands'));
 
   client.on('ready', async () => {
     await client.setProvider(new SQLiteProvider(database));
 
-    ready({ guilds: client.guilds, provider: client.provider });
+    await ready({ guilds: client.guilds, provider: client.provider });
+
+    client.registry
+      .registerGroups(commandGroups)
+      .registerDefaults()
+      .registerCommandsIn(path.resolve(__dirname, 'commands'));
   });
 })();
