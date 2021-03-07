@@ -29,7 +29,7 @@
     "colors": "^1.4.0",
     "core-js": "^3.8.2",
     "discord.js": "^12.3.1",
-    "discord.js-commando": "https://github.com/discordjs/Commando.git",
+    "discord.js-commando": "^0.12.2",
     "erlpack": "discord/erlpack",
     "ffmpeg-static": "^4.2.7",
     "form-data": "^3.0.0",
@@ -39,7 +39,6 @@
     "promise-fs": "^2.1.1",
     "regenerator-runtime": "^0.13.7",
     "short-hash": "^1.0.0",
-    "sqlite": "^4.0.14",
     "sqlite3": "^5.0.0",
     "utf-8-validate": "^5.0.2",
     "zlib-sync": "^0.1.7"
@@ -59,5 +58,8 @@
     "eslint-plugin-import": "^2.22.0",
     "nodemon": "^2.0.4",
     "prettier": "^2.1.2"
+  },
+  "peerDependencies": {
+    "sodium": "^3.0.2"
   }
 }
