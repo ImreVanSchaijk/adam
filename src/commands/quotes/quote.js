@@ -30,7 +30,7 @@ export default class Quote extends Command {
     });
   }
 
-  async getRandomNumber(guild, quotes) {
+  async setNextRandom(guild, quotes) {
     const { provider } = this.client;
     const blacklist = await provider.get(guild, 'blacklist', ['0']);
     let validIndices = Object.keys(quotes).filter((key) => !blacklist.includes(key));
@@ -48,20 +48,21 @@ export default class Quote extends Command {
     const nextRandom = validIndices[Math.floor(Math.random() * (validIndices.length || Object.keys(quotes).length))];
     provider.set(guild, 'nextRandom', nextRandom);
     new Voice({ id: guild.id, provider, quote: quotes[nextRandom] }).preloadFile();
-
-    return randomIndex;
   }
 
   async run(message, { index }) {
     const { provider } = this.client;
     const { guild } = message;
-    const quotes = await provider.get(guild, 'quotes', []);
 
-    const quoteIndex = index.length > 0 ? index : await this.getRandomNumber(guild, quotes);
+    const quotes = await provider.get(guild, 'quotes', []);
+    const quoteIndex = index.length > 0 ? index : await provider.get(guild, 'nextRandom', '0');
     const { parsedQuote } = parseQuote(quotes[quoteIndex], quoteIndex);
 
+    message.say(parsedQuote);
+
+    if (index.length === 0) this.setNextRandom(guild, quotes);
     new Voice({ message, provider, quote: quotes[quoteIndex] }).say();
 
-    return message.say(parsedQuote);
+    return null;
   }
 }
