@@ -1,7 +1,7 @@
 import ready from 'modules/ready';
 
 const events = {
-  debug: console.info,
+  // debug: console.info,
 
   commandCancel: (command, reason, message, result) => {
     if (result) {
