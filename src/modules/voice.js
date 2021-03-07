@@ -95,7 +95,6 @@ export default class Voice {
   }
 
   async say() {
-    console.log({ message: this.message });
     const {
       guild,
       member: { id },
